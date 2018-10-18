@@ -1,8 +1,15 @@
 from werkzeug.datastructures import FileStorage
 from flask import Flask, request, jsonify, make_response
-from radicale import config, ical, Application as Radicale
+from radicale import config, storage, Application as Radicale
+import logging
 app = Flask(__name__)
-radicale_app = Radicale()  # uses /etc/config/radicale
+#radicale_app = Radicale()  # uses /etc/config/radicale
+
+logger = logging.getLogger('radicale')
+config_path = '/etc/radicale/config'
+configuration = config.load([config_path] if config_path else [],
+                            ignore_missing_paths=False)
+radicale_app = Radicale(configuration, logger)  # uses /etc/config/radicale
 
 
 @app.route('/import', methods=['POST'])
@@ -31,14 +38,14 @@ def get_path():
 
 def select_collection(path):
     user = request.environ.get("REMOTE_USER")  # only supporting sandstorm
-    items = ical.Collection.from_path(path, request.environ.get("HTTP_DEPTH", "0"))
+    items = storage.Collection.from_path(path, request.environ.get("HTTP_DEPTH", "0"))
 
     collection_to_use = \
         radicale_app.collect_allowed_items(items, user)[1]  # second item is writable collections
     assert len(collection_to_use) > 0
 
     collection_to_use = collection_to_use[0]
-    assert isinstance(collection_to_use, ical.Collection)
+    assert isinstance(collection_to_use, storage.Collection)
 
     return collection_to_use
 
