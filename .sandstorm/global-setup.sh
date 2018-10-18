@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+sudo apt-get -y install curl unzip
+
 CURL_OPTS="--silent --show-error"
 echo localhost > /etc/hostname
 hostname localhost
