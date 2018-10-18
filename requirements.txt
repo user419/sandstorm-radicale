@@ -1,4 +1,4 @@
-radicale==1.1.1
+radicale==2.1.10
 webassets
 jsmin
 cssmin
